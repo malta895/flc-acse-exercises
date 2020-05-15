@@ -1,0 +1,2150 @@
+%!PS-Adobe-3.0
+%%BoundingBox: 24 24 571 818
+%%Title: Enscript Output
+%%For: Niccolò Izzo
+%%Creator: GNU Enscript 1.6.6
+%%CreationDate: Mon Sep  2 18:16:26 2019
+%%Orientation: Landscape
+%%Pages: (atend)
+%%DocumentMedia: A4 595 842 0 () ()
+%%DocumentNeededResources: (atend)
+%%EndComments
+%%BeginProlog
+%%BeginResource: procset Enscript-Prolog 1.6 6
+%
+% Procedures.
+%
+
+/_S {	% save current state
+  /_s save def
+} def
+/_R {	% restore from saved state
+  _s restore
+} def
+
+/S {	% showpage protecting gstate
+  gsave
+  showpage
+  grestore
+} bind def
+
+/MF {	% fontname newfontname -> -	make a new encoded font
+  /newfontname exch def
+  /fontname exch def
+
+  /fontdict fontname findfont def
+  /newfont fontdict maxlength dict def
+
+  fontdict {
+    exch
+    dup /FID eq {
+      % skip FID pair
+      pop pop
+    } {
+      % copy to the new font dictionary
+      exch newfont 3 1 roll put
+    } ifelse
+  } forall
+
+  newfont /FontName newfontname put
+
+  % insert only valid encoding vectors
+  encoding_vector length 256 eq {
+    newfont /Encoding encoding_vector put
+  } if
+
+  newfontname newfont definefont pop
+} def
+
+/MF_PS { % fontname newfontname -> -	make a new font preserving its enc
+  /newfontname exch def
+  /fontname exch def
+
+  /fontdict fontname findfont def
+  /newfont fontdict maxlength dict def
+
+  fontdict {
+    exch
+    dup /FID eq {
+      % skip FID pair
+      pop pop
+    } {
+      % copy to the new font dictionary
+      exch newfont 3 1 roll put
+    } ifelse
+  } forall
+
+  newfont /FontName newfontname put
+
+  newfontname newfont definefont pop
+} def
+
+/SF { % fontname width height -> -	set a new font
+  /height exch def
+  /width exch def
+
+  findfont
+  [width 0 0 height 0 0] makefont setfont
+} def
+
+/SUF { % fontname width height -> -	set a new user font
+  /height exch def
+  /width exch def
+
+  /F-gs-user-font MF
+  /F-gs-user-font width height SF
+} def
+
+/SUF_PS { % fontname width height -> -	set a new user font preserving its enc
+  /height exch def
+  /width exch def
+
+  /F-gs-user-font MF_PS
+  /F-gs-user-font width height SF
+} def
+
+/M {moveto} bind def
+/s {show} bind def
+
+/Box {	% x y w h -> -			define box path
+  /d_h exch def /d_w exch def /d_y exch def /d_x exch def
+  d_x d_y  moveto
+  d_w 0 rlineto
+  0 d_h rlineto
+  d_w neg 0 rlineto
+  closepath
+} def
+
+/bgs {	% x y height blskip gray str -> -	show string with bg color
+  /str exch def
+  /gray exch def
+  /blskip exch def
+  /height exch def
+  /y exch def
+  /x exch def
+
+  gsave
+    x y blskip sub str stringwidth pop height Box
+    gray setgray
+    fill
+  grestore
+  x y M str s
+} def
+
+/bgcs { % x y height blskip red green blue str -> -  show string with bg color
+  /str exch def
+  /blue exch def
+  /green exch def
+  /red exch def
+  /blskip exch def
+  /height exch def
+  /y exch def
+  /x exch def
+
+  gsave
+    x y blskip sub str stringwidth pop height Box
+    red green blue setrgbcolor
+    fill
+  grestore
+  x y M str s
+} def
+
+% Highlight bars.
+/highlight_bars {	% nlines lineheight output_y_margin gray -> -
+  gsave
+    setgray
+    /ymarg exch def
+    /lineheight exch def
+    /nlines exch def
+
+    % This 2 is just a magic number to sync highlight lines to text.
+    0 d_header_y ymarg sub 2 sub translate
+
+    /cw d_output_w cols div def
+    /nrows d_output_h ymarg 2 mul sub lineheight div cvi def
+
+    % for each column
+    0 1 cols 1 sub {
+      cw mul /xp exch def
+
+      % for each rows
+      0 1 nrows 1 sub {
+        /rn exch def
+        rn lineheight mul neg /yp exch def
+        rn nlines idiv 2 mod 0 eq {
+	  % Draw highlight bar.  4 is just a magic indentation.
+	  xp 4 add yp cw 8 sub lineheight neg Box fill
+	} if
+      } for
+    } for
+
+  grestore
+} def
+
+% Line highlight bar.
+/line_highlight {	% x y width height gray -> -
+  gsave
+    /gray exch def
+    Box gray setgray fill
+  grestore
+} def
+
+% Column separator lines.
+/column_lines {
+  gsave
+    .1 setlinewidth
+    0 d_footer_h translate
+    /cw d_output_w cols div def
+    1 1 cols 1 sub {
+      cw mul 0 moveto
+      0 d_output_h rlineto stroke
+    } for
+  grestore
+} def
+
+% Column borders.
+/column_borders {
+  gsave
+    .1 setlinewidth
+    0 d_footer_h moveto
+    0 d_output_h rlineto
+    d_output_w 0 rlineto
+    0 d_output_h neg rlineto
+    closepath stroke
+  grestore
+} def
+
+% Do the actual underlay drawing
+/draw_underlay {
+  ul_style 0 eq {
+    ul_str true charpath stroke
+  } {
+    ul_str show
+  } ifelse
+} def
+
+% Underlay
+/underlay {	% - -> -
+  gsave
+    0 d_page_h translate
+    d_page_h neg d_page_w atan rotate
+
+    ul_gray setgray
+    ul_font setfont
+    /dw d_page_h dup mul d_page_w dup mul add sqrt def
+    ul_str stringwidth pop dw exch sub 2 div ul_h_ptsize -2 div moveto
+    draw_underlay
+  grestore
+} def
+
+/user_underlay {	% - -> -
+  gsave
+    ul_x ul_y translate
+    ul_angle rotate
+    ul_gray setgray
+    ul_font setfont
+    0 0 ul_h_ptsize 2 div sub moveto
+    draw_underlay
+  grestore
+} def
+
+% Page prefeed
+/page_prefeed {		% bool -> -
+  statusdict /prefeed known {
+    statusdict exch /prefeed exch put
+  } {
+    pop
+  } ifelse
+} def
+
+% Wrapped line markers
+/wrapped_line_mark {	% x y charwith charheight type -> -
+  /type exch def
+  /h exch def
+  /w exch def
+  /y exch def
+  /x exch def
+
+  type 2 eq {
+    % Black boxes (like TeX does)
+    gsave
+      0 setlinewidth
+      x w 4 div add y M
+      0 h rlineto w 2 div 0 rlineto 0 h neg rlineto
+      closepath fill
+    grestore
+  } {
+    type 3 eq {
+      % Small arrows
+      gsave
+        .2 setlinewidth
+        x w 2 div add y h 2 div add M
+        w 4 div 0 rlineto
+        x w 4 div add y lineto stroke
+
+        x w 4 div add w 8 div add y h 4 div add M
+        x w 4 div add y lineto
+	w 4 div h 8 div rlineto stroke
+      grestore
+    } {
+      % do nothing
+    } ifelse
+  } ifelse
+} def
+
+% EPSF import.
+
+/BeginEPSF {
+  /b4_Inc_state save def    		% Save state for cleanup
+  /dict_count countdictstack def	% Count objects on dict stack
+  /op_count count 1 sub def		% Count objects on operand stack
+  userdict begin
+  /showpage { } def
+  0 setgray 0 setlinecap
+  1 setlinewidth 0 setlinejoin
+  10 setmiterlimit [ ] 0 setdash newpath
+  /languagelevel where {
+    pop languagelevel
+    1 ne {
+      false setstrokeadjust false setoverprint
+    } if
+  } if
+} bind def
+
+/EndEPSF {
+  count op_count sub { pos } repeat	% Clean up stacks
+  countdictstack dict_count sub { end } repeat
+  b4_Inc_state restore
+} bind def
+
+% Check PostScript language level.
+/languagelevel where {
+  pop /gs_languagelevel languagelevel def
+} {
+  /gs_languagelevel 1 def
+} ifelse
+%%EndResource
+%%BeginResource: procset Enscript-Encoding-88591 1.6 6
+/encoding_vector [
+/.notdef      	/.notdef      	/.notdef      	/.notdef      	
+/.notdef      	/.notdef      	/.notdef      	/.notdef      	
+/.notdef      	/.notdef      	/.notdef      	/.notdef      	
+/.notdef      	/.notdef      	/.notdef      	/.notdef      	
+/.notdef      	/.notdef      	/.notdef      	/.notdef      	
+/.notdef      	/.notdef      	/.notdef      	/.notdef      	
+/.notdef      	/.notdef      	/.notdef      	/.notdef      	
+/.notdef      	/.notdef      	/.notdef      	/.notdef      	
+/space        	/exclam       	/quotedbl     	/numbersign   	
+/dollar       	/percent      	/ampersand    	/quoteright   	
+/parenleft    	/parenright   	/asterisk     	/plus         	
+/comma        	/hyphen       	/period       	/slash        	
+/zero         	/one          	/two          	/three        	
+/four         	/five         	/six          	/seven        	
+/eight        	/nine         	/colon        	/semicolon    	
+/less         	/equal        	/greater      	/question     	
+/at           	/A            	/B            	/C            	
+/D            	/E            	/F            	/G            	
+/H            	/I            	/J            	/K            	
+/L            	/M            	/N            	/O            	
+/P            	/Q            	/R            	/S            	
+/T            	/U            	/V            	/W            	
+/X            	/Y            	/Z            	/bracketleft  	
+/backslash    	/bracketright 	/asciicircum  	/underscore   	
+/quoteleft    	/a            	/b            	/c            	
+/d            	/e            	/f            	/g            	
+/h            	/i            	/j            	/k            	
+/l            	/m            	/n            	/o            	
+/p            	/q            	/r            	/s            	
+/t            	/u            	/v            	/w            	
+/x            	/y            	/z            	/braceleft    	
+/bar          	/braceright   	/tilde        	/.notdef      	
+/.notdef      	/.notdef      	/.notdef      	/.notdef      	
+/.notdef      	/.notdef      	/.notdef      	/.notdef      	
+/.notdef      	/.notdef      	/.notdef      	/.notdef      	
+/.notdef      	/.notdef      	/.notdef      	/.notdef      	
+/.notdef      	/.notdef      	/.notdef      	/.notdef      	
+/.notdef      	/.notdef      	/.notdef      	/.notdef      	
+/.notdef      	/.notdef      	/.notdef      	/.notdef      	
+/.notdef      	/.notdef      	/.notdef      	/.notdef      	
+/space        	/exclamdown   	/cent         	/sterling     	
+/currency     	/yen          	/brokenbar    	/section      	
+/dieresis     	/copyright    	/ordfeminine  	/guillemotleft	
+/logicalnot   	/hyphen       	/registered   	/macron       	
+/degree       	/plusminus    	/twosuperior  	/threesuperior	
+/acute        	/mu           	/paragraph    	/bullet       	
+/cedilla      	/onesuperior  	/ordmasculine 	/guillemotright	
+/onequarter   	/onehalf      	/threequarters	/questiondown 	
+/Agrave       	/Aacute       	/Acircumflex  	/Atilde       	
+/Adieresis    	/Aring        	/AE           	/Ccedilla     	
+/Egrave       	/Eacute       	/Ecircumflex  	/Edieresis    	
+/Igrave       	/Iacute       	/Icircumflex  	/Idieresis    	
+/Eth          	/Ntilde       	/Ograve       	/Oacute       	
+/Ocircumflex  	/Otilde       	/Odieresis    	/multiply     	
+/Oslash       	/Ugrave       	/Uacute       	/Ucircumflex  	
+/Udieresis    	/Yacute       	/Thorn        	/germandbls   	
+/agrave       	/aacute       	/acircumflex  	/atilde       	
+/adieresis    	/aring        	/ae           	/ccedilla     	
+/egrave       	/eacute       	/ecircumflex  	/edieresis    	
+/igrave       	/iacute       	/icircumflex  	/idieresis    	
+/eth          	/ntilde       	/ograve       	/oacute       	
+/ocircumflex  	/otilde       	/odieresis    	/divide       	
+/oslash       	/ugrave       	/uacute       	/ucircumflex  	
+/udieresis    	/yacute       	/thorn        	/ydieresis    	
+] def
+%%EndResource
+%%EndProlog
+%%BeginSetup
+%%IncludeResource: font Courier-Bold
+%%IncludeResource: font Courier
+/HFpt_w 10 def
+/HFpt_h 10 def
+/Courier-Bold /HF-gs-font MF
+/HF /HF-gs-font findfont [HFpt_w 0 0 HFpt_h 0 0] makefont def
+/Courier /F-gs-font MF
+/F-gs-font 7 7 SF
+/#copies 1 def
+% Pagedevice definitions:
+gs_languagelevel 1 gt {
+  <<
+    /PageSize [595 842] 
+  >> setpagedevice
+} if
+%%BeginResource: procset Enscript-Header-enscript 1.6 6
+%%IncludeResource: font Times-Bold
+%%IncludeResource: font Times-Roman
+
+% Fonts.
+/Times-Bold /HeaderFont-Bold MF
+/HeaderDateF /HeaderFont-Bold findfont 12 scalefont def
+
+/Times-Roman /HeaderFont-Times MF
+/HeaderHDRF /HeaderFont-Times findfont 14 scalefont def
+
+/HeaderPageNumF /Helvetica-Bold findfont 28.8 scalefont def
+
+/do_header {	% print enscript header
+  gsave
+    d_header_x d_header_y translate
+
+    % light bar
+    0 0 d_header_w d_header_h 2 div Box
+    .95 setgray fill
+
+    % dark gray boxes
+    /dbw d_header_h 2 mul def	% dark box width
+    /dbc .7 def			% dark box color
+
+    % left dark box.
+    0 0 dbw d_header_h Box
+    dbc setgray fill
+
+    0 setgray 
+    HeaderDateF setfont
+    moddatestr dup stringwidth pop dbw exch sub 2 div 
+    d_header_h 2 div 2 add moveto show
+    modtimestr dup stringwidth pop dbw exch sub 2 div 
+    d_header_h 5 div moveto show
+
+    % right dark box
+    d_header_w dbw sub 0 dbw d_header_h Box
+    dbc setgray fill
+
+    HeaderPageNumF setfont
+    1 setgray
+    pagenumstr dup
+    stringwidth pop dbw exch sub 2 div d_header_w dbw sub add
+    d_header_h .2 mul moveto show
+
+    % filename
+    0 setgray 
+    HeaderHDRF setfont
+    d_header_w fname stringwidth pop sub 2 div d_header_h 8 div moveto
+    fname show
+
+    % user supplied header string.
+    user_header_p {
+      /h d_header_h 8 div 5 mul def
+
+      % Implement strict enscript compatibility.
+      user_header_center_str () eq user_header_right_str () eq and {
+        d_header_w user_header_left_str stringwidth pop sub 2 div 
+        h moveto user_header_left_str show
+      } {
+        dbw 5 add h moveto user_header_left_str show
+
+        d_header_w user_header_center_str stringwidth pop sub 2 div 
+        h moveto user_header_center_str show
+
+	d_header_w dbw sub 5 sub user_header_right_str stringwidth pop
+	sub h moveto user_header_right_str show
+      } ifelse
+    } if
+
+  grestore
+} def
+%%EndResource
+/d_page_w 794 def
+/d_page_h 547 def
+/d_header_x 0 def
+/d_header_y 511 def
+/d_header_w 794 def
+/d_header_h 36 def
+/d_footer_x 0 def
+/d_footer_y 0 def
+/d_footer_w 794 def
+/d_footer_h 0 def
+/d_output_w 794 def
+/d_output_h 511 def
+/cols 3 def
+%%EndSetup
+%%Page: (1) 1
+%%BeginPageSetup
+_S
+90 rotate
+24 -571 translate
+/pagenum 1 def
+/fname (Acse.y) def
+/fdir (.) def
+/ftail (Acse.y) def
+% User defined strings:
+/pagenumstr (1) def
+/moddatestr (08/29/19) def
+/modtimestr (11:56:10) def
+/user_header_p false def
+/user_footer_p false def
+%%EndPageSetup
+column_lines
+do_header
+5 501 M
+(%{) s
+5 493 M
+(/*) s
+5 485 M
+( * Andrea Di Biagio) s
+5 477 M
+( * Politecnico di Milano, 2007) s
+5 469 M
+( * ) s
+5 461 M
+( * Acse.y) s
+5 453 M
+( * Formal Languages & Compilers Machine, 2007/2008) s
+5 445 M
+( * ) s
+5 437 M
+( */) s
+5 421 M
+(/***********************************************************) s
+5 413 M
+(**************) s
+5 397 M
+(                   Compiler for the language LANCE) s
+5 381 M
+(************************************************************) s
+5 373 M
+(***************/) s
+5 357 M
+(#include <stdio.h>       ) s
+5 349 M
+(#include <stdlib.h>) s
+5 341 M
+(#include <assert.h>) s
+5 333 M
+(#include "axe_struct.h") s
+5 325 M
+(#include "axe_engine.h") s
+5 317 M
+(#include "symbol_table.h") s
+5 309 M
+(#include "axe_errors.h") s
+5 301 M
+(#include "collections.h") s
+5 293 M
+(#include "axe_expressions.h") s
+5 285 M
+(#include "axe_gencode.h") s
+5 277 M
+(#include "axe_utils.h") s
+5 269 M
+(#include "axe_array.h") s
+5 261 M
+(#include "axe_cflow_graph.h") s
+5 253 M
+(#include "cflow_constants.h") s
+5 245 M
+(#include "axe_transform.h") s
+5 237 M
+(#include "axe_reg_alloc.h") s
+5 229 M
+(#include "reg_alloc_constants.h") s
+5 221 M
+(#include "axe_io_manager.h") s
+5 213 M
+(#ifndef NDEBUG) s
+5 205 M
+(#  include "axe_debug.h") s
+5 197 M
+(#endif) s
+5 165 M
+(/* global variables */) s
+5 157 M
+(int line_num;        /* this variable will keep track of the) s
+5 149 M
+(                      * source code line number. Every time ) s
+5 141 M
+(that a newline) s
+5 133 M
+(                      * is encountered while parsing the inp) s
+5 125 M
+(ut file, this) s
+5 117 M
+(                      * value is increased by 1. This value ) s
+5 109 M
+(is then used) s
+5 101 M
+(                      * for error tracking: if the parser re) s
+5 93 M
+(turns an error) s
+5 85 M
+(                      * or a warning, this value is used in ) s
+5 77 M
+(order to notify) s
+5 69 M
+(                      * in which line of code the error has ) s
+5 61 M
+(been found */) s
+5 53 M
+(int num_error;       /* the number of errors found in the co) s
+5 45 M
+(de. This value) s
+5 37 M
+(                      * is increased by 1 every time a new e) s
+5 29 M
+(rror is found) s
+5 21 M
+(                      * in the code. */) s
+5 13 M
+(int num_warning;     /* As for the `num_error' global variab) s
+5 5 M
+(le, this one) s
+269.667 501 M
+(                      * keeps track of all the warning messa) s
+269.667 493 M
+(ges displayed */) s
+269.667 477 M
+(/* errorcode is defined inside "axe_engine.c" */) s
+269.667 469 M
+(extern int errorcode;   /* this variable is used to test if ) s
+269.667 461 M
+(an error is found) s
+269.667 453 M
+(                         * while parsing the input file. It ) s
+269.667 445 M
+(also is set) s
+269.667 437 M
+(                         * to notify if the compiler interna) s
+269.667 429 M
+(l state is invalid.) s
+269.667 421 M
+(                         * When the parsing process is start) s
+269.667 413 M
+(ed, the value) s
+269.667 405 M
+(                         * of `errorcode' is set to the valu) s
+269.667 397 M
+(e of the macro) s
+269.667 389 M
+(                         * `AXE_OK' defined in "axe_constant) s
+269.667 381 M
+(s.h".) s
+269.667 373 M
+(                         * As long as everything \(the parsed) s
+269.667 365 M
+( source code and) s
+269.667 357 M
+(                         * the internal state of the compile) s
+269.667 349 M
+(r\) is correct,) s
+269.667 341 M
+(                         * the value of `errorcode' is set t) s
+269.667 333 M
+(o `AXE_OK'.) s
+269.667 325 M
+(                         * When an error occurs \(because the) s
+269.667 317 M
+( input file contains) s
+269.667 309 M
+(                         * one or more syntax errors or beca) s
+269.667 301 M
+(use something went) s
+269.667 293 M
+(                         * wrong in the machine internal sta) s
+269.667 285 M
+(te\), the errorcode) s
+269.667 277 M
+(                         * is set to a value that is differe) s
+269.667 269 M
+(nt from `AXE_OK'. */) s
+269.667 261 M
+(                         ) s
+269.667 245 M
+(extern int cflow_errorcode;   /* As for `errorcode' this val) s
+269.667 237 M
+(ue is used to) s
+269.667 229 M
+(                        * test if an error occurs during the) s
+269.667 221 M
+( creation process of) s
+269.667 213 M
+(                        * a control flow graph. More informa) s
+269.667 205 M
+(tions can be found) s
+269.667 197 M
+(                        * analyzing the file `axe_cflow_grap) s
+269.667 189 M
+(h.h'. */) s
+269.667 181 M
+(                     ) s
+269.667 173 M
+(/* program informations */) s
+269.667 165 M
+(t_program_infos *program;  /* The singleton instance of `pro) s
+269.667 157 M
+(gram'.) s
+269.667 149 M
+(                            * An instance of `t_program_info) s
+269.667 141 M
+(s' holds in its) s
+269.667 133 M
+(                            * internal structure, all the us) s
+269.667 125 M
+(eful informations) s
+269.667 117 M
+(                            * about a program. For example: ) s
+269.667 109 M
+(the assembly) s
+269.667 101 M
+(                            * \(code and directives\); the sym) s
+269.667 93 M
+(bol table;) s
+269.667 85 M
+(                            * the label manager \(see axe_lab) s
+269.667 77 M
+(els.h\) etc. */) s
+269.667 69 M
+(t_cflow_Graph *graph;      /* An instance of a control flow ) s
+269.667 61 M
+(graph. This instance) s
+269.667 53 M
+(                            * will be generated starting fro) s
+269.667 45 M
+(m `program' and will) s
+269.667 37 M
+(                            * be used during the register al) s
+269.667 29 M
+(location process */) s
+269.667 13 M
+(t_reg_allocator *RA;       /* Register allocator. It impleme) s
+269.667 5 M
+(nts the "Linear scan") s
+534.333 501 M
+(                            * algorythm */) s
+534.333 485 M
+(t_io_infos *file_infos;    /* input and output files used by) s
+534.333 477 M
+( the compiler */) s
+534.333 453 M
+(extern int yylex\(void\);) s
+534.333 445 M
+(extern int yyerror\(const char* errmsg\);) s
+534.333 429 M
+(%}) s
+534.333 421 M
+(%expect 1) s
+534.333 405 M
+(/*==========================================================) s
+534.333 397 M
+(===============) s
+534.333 389 M
+(                          SEMANTIC RECORDS) s
+534.333 381 M
+(============================================================) s
+534.333 373 M
+(=============*/) s
+534.333 357 M
+(%union {            ) s
+534.333 349 M
+(   int intval;) s
+534.333 341 M
+(   char *svalue;) s
+534.333 333 M
+(   t_axe_expression expr;) s
+534.333 325 M
+(   t_axe_declaration *decl;) s
+534.333 317 M
+(   t_list *list;) s
+534.333 309 M
+(   t_axe_label *label;) s
+534.333 301 M
+(   t_while_statement while_stmt;) s
+534.333 293 M
+(} ) s
+534.333 285 M
+(/*==========================================================) s
+534.333 277 M
+(===============) s
+534.333 269 M
+(                               TOKENS ) s
+534.333 261 M
+(============================================================) s
+534.333 253 M
+(=============*/) s
+534.333 245 M
+(%start program) s
+534.333 229 M
+(%token LBRACE RBRACE LPAR RPAR LSQUARE RSQUARE) s
+534.333 221 M
+(%token SEMI COLON PLUS MINUS MUL_OP DIV_OP MOD_OP) s
+534.333 213 M
+(%token AND_OP OR_OP NOT_OP) s
+534.333 205 M
+(%token ASSIGN LT GT SHL_OP SHR_OP EQ NOTEQ LTEQ GTEQ) s
+534.333 197 M
+(%token ANDAND OROR) s
+534.333 189 M
+(%token COMMA) s
+534.333 181 M
+(%token FOR) s
+534.333 173 M
+(%token RETURN) s
+534.333 165 M
+(%token READ) s
+534.333 157 M
+(%token WRITE) s
+534.333 141 M
+(%token <label> DO) s
+534.333 133 M
+(%token <while_stmt> WHILE) s
+534.333 125 M
+(%token <label> IF) s
+534.333 117 M
+(%token <label> ELSE) s
+534.333 109 M
+(%token <intval> TYPE) s
+534.333 101 M
+(%token <svalue> IDENTIFIER) s
+534.333 93 M
+(%token <intval> NUMBER) s
+534.333 77 M
+(%type <expr> exp) s
+534.333 69 M
+(%type <decl> declaration) s
+534.333 61 M
+(%type <list> declaration_list) s
+534.333 53 M
+(%type <label> if_stmt) s
+534.333 37 M
+(/*==========================================================) s
+534.333 29 M
+(===============) s
+534.333 21 M
+(                          OPERATOR PRECEDENCES) s
+534.333 13 M
+( ===========================================================) s
+534.333 5 M
+(==============*/) s
+_R
+S
+%%Page: (2) 2
+%%BeginPageSetup
+_S
+90 rotate
+24 -571 translate
+/pagenum 2 def
+/fname (Acse.y) def
+/fdir (.) def
+/ftail (Acse.y) def
+% User defined strings:
+/pagenumstr (2) def
+/moddatestr (08/29/19) def
+/modtimestr (11:56:10) def
+/user_header_p false def
+/user_footer_p false def
+%%EndPageSetup
+column_lines
+do_header
+5 493 M
+(%left COMMA) s
+5 485 M
+(%left ASSIGN) s
+5 477 M
+(%left OROR) s
+5 469 M
+(%left ANDAND) s
+5 461 M
+(%left OR_OP) s
+5 453 M
+(%left AND_OP) s
+5 445 M
+(%left EQ NOTEQ) s
+5 437 M
+(%left LT GT LTEQ GTEQ) s
+5 429 M
+(%left SHL_OP SHR_OP) s
+5 421 M
+(%left MINUS PLUS) s
+5 413 M
+(%left MUL_OP DIV_OP) s
+5 405 M
+(%right NOT) s
+5 389 M
+(/*==========================================================) s
+5 381 M
+(===============) s
+5 373 M
+(                         BISON GRAMMAR) s
+5 365 M
+(============================================================) s
+5 357 M
+(=============*/) s
+5 349 M
+(%% ) s
+5 333 M
+(/* `program' is the starting non-terminal of the grammar.) s
+5 325 M
+( * A program is composed by:) s
+5 317 M
+(      1. declarations \(zero or more\);) s
+5 309 M
+(      2. A list of instructions. \(at least one instruction!\)) s
+5 301 M
+(.) s
+5 293 M
+( * When the rule associated with the non-terminal `program' ) s
+5 285 M
+(is executed,) s
+5 277 M
+( * the parser notify it to the `program' singleton instance.) s
+5 269 M
+( */) s
+5 261 M
+(program  : var_declarations statements) s
+5 253 M
+(         {) s
+5 245 M
+(            /* Notify the end of the program. Once called) s
+5 237 M
+(             * the function `set_end_Program' - if necessary) s
+5 229 M
+( -) s
+5 221 M
+(             * introduces a `HALT' instruction into the) s
+5 213 M
+(             * list of instructions. */) s
+5 205 M
+(            set_end_Program\(program\);) s
+5 189 M
+(            /* return from yyparse\(\) */) s
+5 181 M
+(            YYACCEPT;) s
+5 173 M
+(         }) s
+5 165 M
+(;) s
+5 149 M
+(var_declarations : var_declarations var_declaration   { /* d) s
+5 141 M
+(oes nothing */ }) s
+5 133 M
+(                 | /* empty */                        { /* d) s
+5 125 M
+(oes nothing */ }) s
+5 117 M
+(;) s
+5 101 M
+(var_declaration   : TYPE declaration_list SEMI) s
+5 93 M
+(                  {) s
+5 85 M
+(                     /* update the program infos by adding n) s
+5 77 M
+(ew variables */) s
+5 69 M
+(                     set_new_variables\(program, $1, $2\);) s
+5 61 M
+(                  }) s
+5 53 M
+(;) s
+5 37 M
+(declaration_list  : declaration_list COMMA declaration) s
+5 29 M
+(                  {  /* add the new declaration to the list ) s
+5 21 M
+(of declarations */) s
+5 13 M
+(                     $$ = addElement\($1, $3, -1\);) s
+5 5 M
+(                  }) s
+269.667 501 M
+(                  | declaration) s
+269.667 493 M
+(                  {) s
+269.667 485 M
+(                     /* add the new declaration to the list ) s
+269.667 477 M
+(of declarations */) s
+269.667 469 M
+(                     $$ = addElement\(NULL, $1, -1\);) s
+269.667 461 M
+(                  }) s
+269.667 453 M
+(;) s
+269.667 437 M
+(declaration : IDENTIFIER ASSIGN NUMBER) s
+269.667 429 M
+(            {) s
+269.667 421 M
+(               /* create a new instance of t_axe_declaration) s
+269.667 413 M
+( */) s
+269.667 405 M
+(               $$ = alloc_declaration\($1, 0, 0, $3\);) s
+269.667 389 M
+(               /* test if an `out of memory' occurred */) s
+269.667 381 M
+(               if \($$ == NULL\)) s
+269.667 373 M
+(                  notifyError\(AXE_OUT_OF_MEMORY\);) s
+269.667 365 M
+(            }) s
+269.667 357 M
+(            | IDENTIFIER LSQUARE NUMBER RSQUARE) s
+269.667 349 M
+(            {) s
+269.667 341 M
+(               /* create a new instance of t_axe_declaration) s
+269.667 333 M
+( */) s
+269.667 325 M
+(               $$ = alloc_declaration\($1, 1, $3, 0\);) s
+269.667 309 M
+(                  /* test if an `out of memory' occurred */) s
+269.667 301 M
+(               if \($$ == NULL\)) s
+269.667 293 M
+(                  notifyError\(AXE_OUT_OF_MEMORY\);) s
+269.667 285 M
+(            }) s
+269.667 277 M
+(            | IDENTIFIER) s
+269.667 269 M
+(            {) s
+269.667 261 M
+(               /* create a new instance of t_axe_declaration) s
+269.667 253 M
+( */) s
+269.667 245 M
+(               $$ = alloc_declaration\($1, 0, 0, 0\);) s
+269.667 237 M
+(               ) s
+269.667 229 M
+(               /* test if an `out of memory' occurred */) s
+269.667 221 M
+(               if \($$ == NULL\)) s
+269.667 213 M
+(                  notifyError\(AXE_OUT_OF_MEMORY\);) s
+269.667 205 M
+(            }) s
+269.667 197 M
+(;) s
+269.667 181 M
+(/* A block of code can be either a single statement or) s
+269.667 173 M
+( * a set of statements enclosed between braces */) s
+269.667 165 M
+(code_block  : statement                  { /* does nothing *) s
+269.667 157 M
+(/ }) s
+269.667 149 M
+(            | LBRACE statements RBRACE   { /* does nothing *) s
+269.667 141 M
+(/ }) s
+269.667 133 M
+(;) s
+269.667 117 M
+(/* One or more code statements */) s
+269.667 109 M
+(statements  : statements statement       { /* does nothing *) s
+269.667 101 M
+(/ }) s
+269.667 93 M
+(            | statement                  { /* does nothing *) s
+269.667 85 M
+(/ }) s
+269.667 77 M
+(;) s
+269.667 61 M
+(/* A statement can be either an assignment statement or a co) s
+269.667 53 M
+(ntrol statement) s
+269.667 45 M
+( * or a read/write statement or a semicolon */) s
+269.667 37 M
+(statement   : assign_statement SEMI      { /* does nothing *) s
+269.667 29 M
+(/ }) s
+269.667 21 M
+(            | control_statement          { /* does nothing *) s
+269.667 13 M
+(/ }) s
+269.667 5 M
+(            | read_write_statement SEMI  { /* does nothing *) s
+534.333 501 M
+(/ }) s
+534.333 493 M
+(            | SEMI            { gen_nop_instruction\(program\)) s
+534.333 485 M
+(; }) s
+534.333 477 M
+(;) s
+534.333 461 M
+(control_statement : if_statement         { /* does nothing *) s
+534.333 453 M
+(/ }) s
+534.333 445 M
+(            | while_statement            { /* does nothing *) s
+534.333 437 M
+(/ }) s
+534.333 429 M
+(            | do_while_statement SEMI    { /* does nothing *) s
+534.333 421 M
+(/ }) s
+534.333 413 M
+(            | return_statement SEMI      { /* does nothing *) s
+534.333 405 M
+(/ }) s
+534.333 397 M
+(;) s
+534.333 381 M
+(read_write_statement : read_statement  { /* does nothing */ ) s
+534.333 373 M
+(}) s
+534.333 365 M
+(                     | write_statement { /* does nothing */ ) s
+534.333 357 M
+(}) s
+534.333 349 M
+(;) s
+534.333 333 M
+(assign_statement : IDENTIFIER LSQUARE exp RSQUARE ASSIGN exp) s
+534.333 325 M
+(            {) s
+534.333 317 M
+(               /* Notify to `program' that the value $6) s
+534.333 309 M
+(                * have to be assigned to the location) s
+534.333 301 M
+(                * addressed by $1[$3]. Where $1 is obviously) s
+534.333 293 M
+(                * the array/pointer identifier, $3 is an exp) s
+534.333 285 M
+(ression) s
+534.333 277 M
+(                * that holds an integer value. That value wi) s
+534.333 269 M
+(ll be) s
+534.333 261 M
+(                * used as an index for the array $1 */) s
+534.333 253 M
+(               storeArrayElement\(program, $1, $3, $6\);) s
+534.333 237 M
+(               /* free the memory associated with the IDENTI) s
+534.333 229 M
+(FIER.) s
+534.333 221 M
+(                * The use of the free instruction is require) s
+534.333 213 M
+(d) s
+534.333 205 M
+(                * because of the value associated with IDENT) s
+534.333 197 M
+(IFIER.) s
+534.333 189 M
+(                * The value of IDENTIFIER is a string create) s
+534.333 181 M
+(d) s
+534.333 173 M
+(                * by a call to the function `strdup' \(see Ac) s
+534.333 165 M
+(se.lex\) */) s
+534.333 157 M
+(               free\($1\);) s
+534.333 149 M
+(            }) s
+534.333 141 M
+(            | IDENTIFIER ASSIGN exp) s
+534.333 133 M
+(            {) s
+534.333 125 M
+(               int location;) s
+534.333 109 M
+(               /* in order to assign a value to a variable, ) s
+534.333 101 M
+(we have to) s
+534.333 93 M
+(                * know where the variable is located \(i.e. i) s
+534.333 85 M
+(n which register\).) s
+534.333 77 M
+(                * the function `get_symbol_location' is used) s
+534.333 69 M
+( in order) s
+534.333 61 M
+(                * to retrieve the register location assigned) s
+534.333 53 M
+( to) s
+534.333 45 M
+(                * a given identifier.) s
+534.333 37 M
+(                * A symbol table keeps track of the location) s
+534.333 29 M
+( of every) s
+534.333 21 M
+(                * declared variable.) s
+534.333 13 M
+(                * `get_symbol_location' perform a query on t) s
+534.333 5 M
+(he symbol table) s
+_R
+S
+%%Page: (3) 3
+%%BeginPageSetup
+_S
+90 rotate
+24 -571 translate
+/pagenum 3 def
+/fname (Acse.y) def
+/fdir (.) def
+/ftail (Acse.y) def
+% User defined strings:
+/pagenumstr (3) def
+/moddatestr (08/29/19) def
+/modtimestr (11:56:10) def
+/user_header_p false def
+/user_footer_p false def
+%%EndPageSetup
+column_lines
+do_header
+5 501 M
+(                * in order to discover the correct location ) s
+5 493 M
+(of) s
+5 485 M
+(                * the variable with $1 as identifier */) s
+5 477 M
+(               ) s
+5 469 M
+(               /* get the location of the symbol with the gi) s
+5 461 M
+(ven ID. */) s
+5 453 M
+(               location = get_symbol_location\(program, $1, 0) s
+5 445 M
+(\);) s
+5 429 M
+(               /* update the value of location */) s
+5 421 M
+(               if \($3.expression_type == IMMEDIATE\)) s
+5 413 M
+(                  gen_move_immediate\(program, location, $3.v) s
+5 405 M
+(alue\);) s
+5 397 M
+(               else) s
+5 389 M
+(                  gen_add_instruction\(program,) s
+5 381 M
+(                                      location,) s
+5 373 M
+(                                      REG_0,) s
+5 365 M
+(                                      $3.value,) s
+5 357 M
+(                                      CG_DIRECT_ALL\);) s
+5 341 M
+(               /* free the memory associated with the IDENTI) s
+5 333 M
+(FIER */) s
+5 325 M
+(               free\($1\);) s
+5 317 M
+(            }) s
+5 309 M
+(;) s
+5 301 M
+(            ) s
+5 293 M
+(if_statement   : if_stmt) s
+5 285 M
+(               {) s
+5 277 M
+(                  /* fix the `label_else' */) s
+5 269 M
+(                  assignLabel\(program, $1\);) s
+5 261 M
+(               }) s
+5 253 M
+(               | if_stmt ELSE) s
+5 245 M
+(               {) s
+5 237 M
+(                  /* reserve a new label that points to the ) s
+5 229 M
+(address where to jump if) s
+5 221 M
+(                   * `exp' is verified */) s
+5 213 M
+(                  $2 = newLabel\(program\);) s
+5 205 M
+(   ) s
+5 197 M
+(                  /* exit from the if-else */) s
+5 189 M
+(                  gen_bt_instruction \(program, $2, 0\);) s
+5 181 M
+(   ) s
+5 173 M
+(                  /* fix the `label_else' */) s
+5 165 M
+(                  assignLabel\(program, $1\);) s
+5 157 M
+(               }) s
+5 149 M
+(               code_block) s
+5 141 M
+(               {) s
+5 133 M
+(                  /* fix the `label_else' */) s
+5 125 M
+(                  assignLabel\(program, $2\);) s
+5 117 M
+(               }) s
+5 109 M
+(;) s
+5 101 M
+(            ) s
+5 93 M
+(if_stmt  :  IF) s
+5 85 M
+(               {) s
+5 77 M
+(                  /* the label that points to the address wh) s
+5 69 M
+(ere to jump if) s
+5 61 M
+(                   * `exp' is not verified */) s
+5 53 M
+(                  $1 = newLabel\(program\);) s
+5 45 M
+(               }) s
+5 37 M
+(               LPAR exp RPAR) s
+5 29 M
+(               {) s
+5 21 M
+(                     if \($4.expression_type == IMMEDIATE\)) s
+5 13 M
+(                         gen_load_immediate\(program, $4.valu) s
+5 5 M
+(e\);) s
+269.667 501 M
+(                     else) s
+269.667 493 M
+(                         gen_andb_instruction\(program, $4.va) s
+269.667 485 M
+(lue,) s
+269.667 477 M
+(                             $4.value, $4.value, CG_DIRECT_A) s
+269.667 469 M
+(LL\);) s
+269.667 453 M
+(                     /* if `exp' returns FALSE, jump to the ) s
+269.667 445 M
+(label $1 */) s
+269.667 437 M
+(                     gen_beq_instruction \(program, $1, 0\);) s
+269.667 429 M
+(               }) s
+269.667 421 M
+(               code_block { $$ = $1; }) s
+269.667 413 M
+(;) s
+269.667 397 M
+(while_statement  : WHILE) s
+269.667 389 M
+(                  {) s
+269.667 381 M
+(                     /* initialize the value of the non-term) s
+269.667 373 M
+(inal */) s
+269.667 365 M
+(                     $1 = create_while_statement\(\);) s
+269.667 349 M
+(                     /* reserve and fix a new label */) s
+269.667 341 M
+(                     $1.label_condition) s
+269.667 333 M
+(                           = assignNewLabel\(program\);) s
+269.667 325 M
+(                  }) s
+269.667 317 M
+(                  LPAR exp RPAR) s
+269.667 309 M
+(                  {) s
+269.667 301 M
+(                     if \($4.expression_type == IMMEDIATE\)) s
+269.667 293 M
+(                        gen_load_immediate\(program, $4.value) s
+269.667 285 M
+(\);) s
+269.667 277 M
+(                     else) s
+269.667 269 M
+(                         gen_andb_instruction\(program, $4.va) s
+269.667 261 M
+(lue,) s
+269.667 253 M
+(                             $4.value, $4.value, CG_DIRECT_A) s
+269.667 245 M
+(LL\);) s
+269.667 229 M
+(                     /* reserve a new label. This new label ) s
+269.667 221 M
+(will point) s
+269.667 213 M
+(                      * to the first instruction after the w) s
+269.667 205 M
+(hile code) s
+269.667 197 M
+(                      * block */) s
+269.667 189 M
+(                     $1.label_end = newLabel\(program\);) s
+269.667 173 M
+(                     /* if `exp' returns FALSE, jump to the ) s
+269.667 165 M
+(label $1.label_end */) s
+269.667 157 M
+(                     gen_beq_instruction \(program, $1.label_) s
+269.667 149 M
+(end, 0\);) s
+269.667 141 M
+(                  }) s
+269.667 133 M
+(                  code_block) s
+269.667 125 M
+(                  {) s
+269.667 117 M
+(                     /* jump to the beginning of the loop */) s
+269.667 109 M
+(                     gen_bt_instruction) s
+269.667 101 M
+(                           \(program, $1.label_condition, 0\);) s
+269.667 85 M
+(                     /* fix the label `label_end' */) s
+269.667 77 M
+(                     assignLabel\(program, $1.label_end\);) s
+269.667 69 M
+(                  }) s
+269.667 61 M
+(;) s
+269.667 53 M
+(                  ) s
+269.667 45 M
+(do_while_statement  : DO) s
+269.667 37 M
+(                     {) s
+269.667 29 M
+(                        /* the label that points to the addr) s
+269.667 21 M
+(ess where to jump if) s
+269.667 13 M
+(                         * `exp' is not verified */) s
+269.667 5 M
+(                        $1 = newLabel\(program\);) s
+534.333 501 M
+(                        ) s
+534.333 493 M
+(                        /* fix the label */) s
+534.333 485 M
+(                        assignLabel\(program, $1\);) s
+534.333 477 M
+(                     }) s
+534.333 469 M
+(                     code_block WHILE LPAR exp RPAR) s
+534.333 461 M
+(                     {) s
+534.333 453 M
+(                           if \($6.expression_type == IMMEDIA) s
+534.333 445 M
+(TE\)) s
+534.333 437 M
+(                               gen_load_immediate\(program, $) s
+534.333 429 M
+(6.value\);) s
+534.333 421 M
+(                           else) s
+534.333 413 M
+(                               gen_andb_instruction\(program,) s
+534.333 405 M
+( $6.value,) s
+534.333 397 M
+(                                   $6.value, $6.value, CG_DI) s
+534.333 389 M
+(RECT_ALL\);) s
+534.333 373 M
+(                           /* if `exp' returns TRUE, jump to) s
+534.333 365 M
+( the label $1 */) s
+534.333 357 M
+(                           gen_bne_instruction \(program, $1,) s
+534.333 349 M
+( 0\);) s
+534.333 341 M
+(                     }) s
+534.333 333 M
+(;) s
+534.333 317 M
+(return_statement : RETURN) s
+534.333 309 M
+(            {) s
+534.333 301 M
+(               /* insert an HALT instruction */) s
+534.333 293 M
+(               gen_halt_instruction\(program\);) s
+534.333 285 M
+(            }) s
+534.333 277 M
+(;) s
+534.333 261 M
+(read_statement : READ LPAR IDENTIFIER RPAR ) s
+534.333 253 M
+(            {) s
+534.333 245 M
+(               int location;) s
+534.333 237 M
+(               ) s
+534.333 229 M
+(               /* read from standard input an integer value ) s
+534.333 221 M
+(and assign) s
+534.333 213 M
+(                * it to a variable associated with the given) s
+534.333 205 M
+( identifier */) s
+534.333 197 M
+(               /* get the location of the symbol with the gi) s
+534.333 189 M
+(ven ID */) s
+534.333 181 M
+(               ) s
+534.333 173 M
+(               /* lookup the symbol table and fetch the regi) s
+534.333 165 M
+(ster location) s
+534.333 157 M
+(                * associated with the IDENTIFIER $3. */) s
+534.333 149 M
+(               location = get_symbol_location\(program, $3, 0) s
+534.333 141 M
+(\);) s
+534.333 125 M
+(               /* insert a read instruction */) s
+534.333 117 M
+(               gen_read_instruction \(program, location\);) s
+534.333 101 M
+(               /* free the memory associated with the IDENTI) s
+534.333 93 M
+(FIER */) s
+534.333 85 M
+(               free\($3\);) s
+534.333 77 M
+(            }) s
+534.333 69 M
+(;) s
+534.333 61 M
+(            ) s
+534.333 53 M
+(write_statement : WRITE LPAR exp RPAR ) s
+534.333 45 M
+(            {) s
+534.333 37 M
+(   ) s
+534.333 29 M
+(               int location;) s
+534.333 13 M
+(               if \($3.expression_type == IMMEDIATE\)) s
+534.333 5 M
+(               {) s
+_R
+S
+%%Page: (4) 4
+%%BeginPageSetup
+_S
+90 rotate
+24 -571 translate
+/pagenum 4 def
+/fname (Acse.y) def
+/fdir (.) def
+/ftail (Acse.y) def
+% User defined strings:
+/pagenumstr (4) def
+/moddatestr (08/29/19) def
+/modtimestr (11:56:10) def
+/user_header_p false def
+/user_footer_p false def
+%%EndPageSetup
+column_lines
+do_header
+5 501 M
+(                  /* load `immediate' into a new register. R) s
+5 493 M
+(eturns the new register) s
+5 485 M
+(                   * identifier or REG_INVALID if an error o) s
+5 477 M
+(ccurs */) s
+5 469 M
+(                  location = gen_load_immediate\(program, $3.) s
+5 461 M
+(value\);) s
+5 453 M
+(               }) s
+5 445 M
+(               else) s
+5 437 M
+(                  location = $3.value;) s
+5 421 M
+(               /* write to standard output an integer value ) s
+5 413 M
+(*/) s
+5 405 M
+(               gen_write_instruction \(program, location\);) s
+5 397 M
+(            }) s
+5 389 M
+(;) s
+5 373 M
+(exp: NUMBER      { $$ = create_expression \($1, IMMEDIATE\); }) s
+5 365 M
+(   | IDENTIFIER  {) s
+5 357 M
+(                     int location;) s
+5 349 M
+(   ) s
+5 341 M
+(                     /* get the location of the symbol with ) s
+5 333 M
+(the given ID */) s
+5 325 M
+(                     location = get_symbol_location\(program,) s
+5 317 M
+( $1, 0\);) s
+5 309 M
+(                     ) s
+5 301 M
+(                     /* return the register location of IDEN) s
+5 293 M
+(TIFIER as) s
+5 285 M
+(                      * a value for `exp' */) s
+5 277 M
+(                     $$ = create_expression \(location, REGIS) s
+5 269 M
+(TER\);) s
+5 253 M
+(                     /* free the memory associated with the ) s
+5 245 M
+(IDENTIFIER */) s
+5 237 M
+(                     free\($1\);) s
+5 229 M
+(   }) s
+5 221 M
+(   | IDENTIFIER LSQUARE exp RSQUARE {) s
+5 213 M
+(                     int reg;) s
+5 205 M
+(                     ) s
+5 197 M
+(                     /* load the value IDENTIFIER[exp]) s
+5 189 M
+(                      * into `arrayElement' */) s
+5 181 M
+(                     reg = loadArrayElement\(program, $1, $3\)) s
+5 173 M
+(;) s
+5 157 M
+(                     /* create a new expression */) s
+5 149 M
+(                     $$ = create_expression \(reg, REGISTER\);) s
+5 133 M
+(                     /* free the memory associated with the ) s
+5 125 M
+(IDENTIFIER */) s
+5 117 M
+(                     free\($1\);) s
+5 109 M
+(   }) s
+5 101 M
+(   | NOT_OP NUMBER   {  if \($2 == 0\)) s
+5 93 M
+(                           $$ = create_expression \(1, IMMEDI) s
+5 85 M
+(ATE\);) s
+5 77 M
+(                        else) s
+5 69 M
+(                           $$ = create_expression \(0, IMMEDI) s
+5 61 M
+(ATE\);) s
+5 53 M
+(   }) s
+5 45 M
+(   | NOT_OP IDENTIFIER  {) s
+5 37 M
+(                           int identifier_location;) s
+5 29 M
+(                           int output_register;) s
+5 21 M
+(   ) s
+5 13 M
+(                           /* get the location of the symbol) s
+5 5 M
+( with the given ID */) s
+269.667 501 M
+(                           identifier_location =) s
+269.667 493 M
+(                                 get_symbol_location\(program) s
+269.667 485 M
+(, $2, 0\);) s
+269.667 469 M
+(                           /* generate a NOT instruction. In) s
+269.667 461 M
+( order to do this,) s
+269.667 453 M
+(                            * at first we have to ask for a ) s
+269.667 445 M
+(free register where) s
+269.667 437 M
+(                            * to store the result of the NOT) s
+269.667 429 M
+( instruction. */) s
+269.667 421 M
+(                           output_register = getNewRegister\() s
+269.667 413 M
+(program\);) s
+269.667 397 M
+(                           /* Now we are able to generate a ) s
+269.667 389 M
+(NOT instruction */) s
+269.667 381 M
+(                           gen_notl_instruction \(program, ou) s
+269.667 373 M
+(tput_register) s
+269.667 365 M
+(                                 , identifier_location\);) s
+269.667 349 M
+(                           $$ = create_expression \(output_re) s
+269.667 341 M
+(gister, REGISTER\);) s
+269.667 325 M
+(                           /* free the memory associated wit) s
+269.667 317 M
+(h the IDENTIFIER */) s
+269.667 309 M
+(                           free\($2\);) s
+269.667 301 M
+(   }) s
+269.667 293 M
+(   | exp AND_OP exp     {) s
+269.667 285 M
+(                           $$ = handle_bin_numeric_op\(progra) s
+269.667 277 M
+(m, $1, $3, ANDB\);) s
+269.667 269 M
+(   }) s
+269.667 261 M
+(   | exp OR_OP exp      {) s
+269.667 253 M
+(                           $$ = handle_bin_numeric_op\(progra) s
+269.667 245 M
+(m, $1, $3, ORB\);) s
+269.667 237 M
+(   }) s
+269.667 229 M
+(   | exp PLUS exp       {) s
+269.667 221 M
+(                           $$ = handle_bin_numeric_op\(progra) s
+269.667 213 M
+(m, $1, $3, ADD\);) s
+269.667 205 M
+(   }) s
+269.667 197 M
+(   | exp MINUS exp      {) s
+269.667 189 M
+(                           $$ = handle_bin_numeric_op\(progra) s
+269.667 181 M
+(m, $1, $3, SUB\);) s
+269.667 173 M
+(   }) s
+269.667 165 M
+(   | exp MUL_OP exp     {) s
+269.667 157 M
+(                           $$ = handle_bin_numeric_op\(progra) s
+269.667 149 M
+(m, $1, $3, MUL\);) s
+269.667 141 M
+(   }) s
+269.667 133 M
+(   | exp DIV_OP exp     {) s
+269.667 125 M
+(                           $$ = handle_bin_numeric_op\(progra) s
+269.667 117 M
+(m, $1, $3, DIV\);) s
+269.667 109 M
+(   }) s
+269.667 101 M
+(   | exp LT exp      {) s
+269.667 93 M
+(                        $$ = handle_binary_comparison \(progr) s
+269.667 85 M
+(am, $1, $3, _LT_\);) s
+269.667 77 M
+(   }) s
+269.667 69 M
+(   | exp GT exp      {) s
+269.667 61 M
+(                        $$ = handle_binary_comparison \(progr) s
+269.667 53 M
+(am, $1, $3, _GT_\);) s
+269.667 45 M
+(   }) s
+269.667 37 M
+(   | exp EQ exp      {) s
+269.667 29 M
+(                        $$ = handle_binary_comparison \(progr) s
+269.667 21 M
+(am, $1, $3, _EQ_\);) s
+269.667 13 M
+(   }) s
+269.667 5 M
+(   | exp NOTEQ exp   {) s
+534.333 501 M
+(                        $$ = handle_binary_comparison \(progr) s
+534.333 493 M
+(am, $1, $3, _NOTEQ_\);) s
+534.333 485 M
+(   }) s
+534.333 477 M
+(   | exp LTEQ exp    {) s
+534.333 469 M
+(                        $$ = handle_binary_comparison \(progr) s
+534.333 461 M
+(am, $1, $3, _LTEQ_\);) s
+534.333 453 M
+(   }) s
+534.333 445 M
+(   | exp GTEQ exp    {) s
+534.333 437 M
+(                        $$ = handle_binary_comparison \(progr) s
+534.333 429 M
+(am, $1, $3, _GTEQ_\);) s
+534.333 421 M
+(   }) s
+534.333 413 M
+(   | exp SHL_OP exp  {  $$ = handle_bin_numeric_op\(program, ) s
+534.333 405 M
+($1, $3, SHL\); }) s
+534.333 397 M
+(   | exp SHR_OP exp  {  $$ = handle_bin_numeric_op\(program, ) s
+534.333 389 M
+($1, $3, SHR\); }) s
+534.333 381 M
+(   | exp ANDAND exp  {  $$ = handle_bin_numeric_op\(program, ) s
+534.333 373 M
+($1, $3, ANDL\); }) s
+534.333 365 M
+(   | exp OROR exp    {  $$ = handle_bin_numeric_op\(program, ) s
+534.333 357 M
+($1, $3, ORL\); }) s
+534.333 349 M
+(   | LPAR exp RPAR   { $$ = $2; }) s
+534.333 341 M
+(   | MINUS exp       {) s
+534.333 333 M
+(                        if \($2.expression_type == IMMEDIATE\)) s
+534.333 325 M
+(                        {) s
+534.333 317 M
+(                           $$ = $2;) s
+534.333 309 M
+(                           $$.value = - \($$.value\);) s
+534.333 301 M
+(                        }) s
+534.333 293 M
+(                        else) s
+534.333 285 M
+(                        {) s
+534.333 277 M
+(                           t_axe_expression exp_r0;) s
+534.333 261 M
+(                           /* create an expression for regis) s
+534.333 253 M
+(rer REG_0 */) s
+534.333 245 M
+(                           exp_r0.value = REG_0;) s
+534.333 237 M
+(                           exp_r0.expression_type = REGISTER) s
+534.333 229 M
+(;) s
+534.333 221 M
+(                           ) s
+534.333 213 M
+(                           $$ = handle_bin_numeric_op) s
+534.333 205 M
+(                                 \(program, exp_r0, $2, SUB\);) s
+534.333 197 M
+(                        }) s
+534.333 189 M
+(                     }) s
+534.333 181 M
+(;) s
+534.333 165 M
+(%%) s
+534.333 157 M
+(/*==========================================================) s
+534.333 149 M
+(===============) s
+534.333 141 M
+(                                  MAIN) s
+534.333 133 M
+(============================================================) s
+534.333 125 M
+(=============*/) s
+534.333 117 M
+(int main \(int argc, char **argv\)) s
+534.333 109 M
+({) s
+534.333 101 M
+(   /* initialize all the compiler data structures and global) s
+534.333 93 M
+( variables */) s
+534.333 85 M
+(   init_compiler\(argc, argv\);) s
+534.333 77 M
+(   ) s
+534.333 69 M
+(   /* start the parsing procedure */) s
+534.333 61 M
+(   yyparse\(\);) s
+534.333 53 M
+(   ) s
+534.333 45 M
+(#ifndef NDEBUG) s
+534.333 37 M
+(   fprintf\(stdout, "Parsing process completed. \\n"\);) s
+534.333 29 M
+(#endif) s
+534.333 13 M
+(   /* test if the parsing process completed succesfully */) s
+534.333 5 M
+(   checkConsistency\(\);) s
+_R
+S
+%%Page: (5) 5
+%%BeginPageSetup
+_S
+90 rotate
+24 -571 translate
+/pagenum 5 def
+/fname (Acse.y) def
+/fdir (.) def
+/ftail (Acse.y) def
+% User defined strings:
+/pagenumstr (5) def
+/moddatestr (08/29/19) def
+/modtimestr (11:56:10) def
+/user_header_p false def
+/user_footer_p false def
+%%EndPageSetup
+column_lines
+do_header
+5 501 M
+(   ) s
+5 493 M
+(#ifndef NDEBUG) s
+5 485 M
+(   fprintf\(stdout, "Creating a control flow graph. \\n"\);) s
+5 477 M
+(#endif) s
+5 461 M
+(   /* create the control flow graph */) s
+5 453 M
+(   graph = createFlowGraph\(program->instructions\);) s
+5 445 M
+(   checkConsistency\(\);) s
+5 429 M
+(#ifndef NDEBUG) s
+5 421 M
+(   assert\(program != NULL\);) s
+5 413 M
+(   assert\(program->sy_table != NULL\);) s
+5 405 M
+(   assert\(file_infos != NULL\);) s
+5 397 M
+(   assert\(file_infos->syTable_output != NULL\);) s
+5 389 M
+(   printSymbolTable\(program->sy_table, file_infos->syTable_o) s
+5 381 M
+(utput\);) s
+5 373 M
+(   printGraphInfos\(graph, file_infos->cfg_1, 0\);) s
+5 365 M
+(      ) s
+5 357 M
+(   fprintf\(stdout, "Updating the basic blocks. \\n"\);) s
+5 349 M
+(#endif) s
+5 341 M
+(      ) s
+5 333 M
+(   /* update the control flow graph by inserting load and st) s
+5 325 M
+(ores inside) s
+5 317 M
+(   * every basic block */) s
+5 309 M
+(   graph = insertLoadAndStoreInstr\(program, graph\);) s
+5 293 M
+(#ifndef NDEBUG) s
+5 285 M
+(   fprintf\(stdout, "Executing a liveness analysis on the int) s
+5 277 M
+(ermediate code \\n"\);) s
+5 269 M
+(#endif) s
+5 261 M
+(   performLivenessAnalysis\(graph\);) s
+5 253 M
+(   checkConsistency\(\);) s
+5 237 M
+(#ifndef NDEBUG) s
+5 229 M
+(   printGraphInfos\(graph, file_infos->cfg_2, 1\);) s
+5 221 M
+(#endif) s
+5 213 M
+(      ) s
+5 205 M
+(#ifndef NDEBUG) s
+5 197 M
+(   fprintf\(stdout, "Starting the register allocation process) s
+5 189 M
+(. \\n"\);) s
+5 181 M
+(#endif) s
+5 173 M
+(   /* initialize the register allocator by using the control) s
+5 165 M
+( flow) s
+5 157 M
+(    * informations stored into the control flow graph */) s
+5 149 M
+(   RA = initializeRegAlloc\(graph\);) s
+5 141 M
+(      ) s
+5 133 M
+(   /* execute the linear scan algorythm */) s
+5 125 M
+(   execute_linear_scan\(RA\);) s
+5 117 M
+(      ) s
+5 109 M
+(#ifndef NDEBUG) s
+5 101 M
+(   printRegAllocInfos\(RA, file_infos->reg_alloc_output\);) s
+5 93 M
+(#endif) s
+5 77 M
+(#ifndef NDEBUG) s
+5 69 M
+(   fprintf\(stdout, "Updating the control flow informations. ) s
+5 61 M
+(\\n"\);) s
+5 53 M
+(#endif) s
+5 45 M
+(   /* apply changes to the program informations by using the) s
+5 37 M
+( informations) s
+5 29 M
+(   * of the register allocation process */) s
+5 21 M
+(   updateProgramInfos\(program, graph, RA\);) s
+5 5 M
+(#ifndef NDEBUG) s
+269.667 501 M
+(   fprintf\(stdout, "Writing the assembly file... \\n"\);) s
+269.667 493 M
+(#endif) s
+269.667 485 M
+(   writeAssembly\(program, file_infos->output_file_name\);) s
+269.667 477 M
+(      ) s
+269.667 469 M
+(#ifndef NDEBUG) s
+269.667 461 M
+(   fprintf\(stdout, "Assembly written on file \\"%s\\".\\n", fil) s
+269.667 453 M
+(e_infos->output_file_name\);) s
+269.667 445 M
+(#endif) s
+269.667 437 M
+(   ) s
+269.667 429 M
+(   /* shutdown the compiler */) s
+269.667 421 M
+(   shutdownCompiler\(0\);) s
+269.667 405 M
+(   return 0;) s
+269.667 397 M
+(}) s
+269.667 381 M
+(/*==========================================================) s
+269.667 373 M
+(===============) s
+269.667 365 M
+(                                 YYERROR) s
+269.667 357 M
+(============================================================) s
+269.667 349 M
+(=============*/) s
+269.667 341 M
+(int yyerror\(const char* errmsg\)) s
+269.667 333 M
+({) s
+269.667 325 M
+(   errorcode = AXE_SYNTAX_ERROR;) s
+269.667 317 M
+(   ) s
+269.667 309 M
+(   return 0;) s
+269.667 301 M
+(}) s
+_R
+S
+%%Trailer
+%%Pages: 5
+%%DocumentNeededResources: font Times-Roman Courier-Bold Courier 
+%%+ font Times-Bold 
+%%EOF
