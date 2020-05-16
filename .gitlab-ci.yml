@@ -4,6 +4,8 @@ before_script:
   # - apt update && apt -y install make autoconf flex bison build-essential
   - apk update && apk add make autoconf flex bison build-base
 
+
+
 build:
   stage: build
   script:
@@ -12,4 +14,4 @@ build:
 build_tests:
   stage: build
   script:
-    - make tests
+    - make && make tests
