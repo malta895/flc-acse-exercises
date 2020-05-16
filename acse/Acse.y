@@ -89,6 +89,10 @@ t_reg_allocator *RA;       /* Register allocator. It implements the "Linear scan
 
 t_io_infos *file_infos;    /* input and output files used by the compiler */
 
+t_axe_label *exception_label;
+
+int exception_reg;
+
 
 extern int yylex(void);
 extern int yyerror(const char* errmsg);
@@ -124,6 +128,7 @@ extern int yyerror(const char* errmsg);
 %token RETURN
 %token READ
 %token WRITE
+%token THROW
 
 %token <label> DO
 %token <while_stmt> WHILE
@@ -132,6 +137,7 @@ extern int yyerror(const char* errmsg);
 %token <intval> TYPE
 %token <svalue> IDENTIFIER
 %token <intval> NUMBER
+%token  <label> TRY CATCH
 
 %type <expr> exp
 %type <decl> declaration
@@ -253,6 +259,8 @@ control_statement : if_statement         { /* does nothing */ }
             | while_statement            { /* does nothing */ }
             | do_while_statement SEMI    { /* does nothing */ }
             | return_statement SEMI      { /* does nothing */ }
+            | try_catch_statement SEMI   { /* does nothing */ }
+            | throw_statement SEMI   { /* does nothing */ }
 ;
 
 read_write_statement : read_statement  { /* does nothing */ }
@@ -417,6 +425,76 @@ return_statement : RETURN
                gen_halt_instruction(program);
             }
 ;
+
+try_catch_statement : TRY
+                {
+//Declare register to store exception value
+                    exception_reg = gen_load_immediate(program, 0);
+//Declare label pointing at catch section
+exception_label = newLabel(program);
+//Declare catch bypass label
+$1 = newLabel(program);
+}
+
+code_block
+                {
+//Bypass the catch code blocks
+                    gen_bt_instruction(program, $1, 0);
+//Fix the throw label
+                    assignLabel(program, exception_label);
+}
+catch_list
+                {
+//Fix catch bypass label
+                    assignLabel(program, $1);
+}
+
+catch_list : catch_list catch
+        |       %empty
+;
+
+
+catch : CATCH LPAR exp RPAR
+                {
+//Bypass this catch if register does not match
+$1 = newLabel(program);
+ t_axe_expression exp = create_expression(exception_reg, REGISTER);
+ handle_binary_comparison(program, $3, exp, _NOTEQ_);
+ gen_bne_instruction (program, $1, 0);
+}
+
+catch_list : catch_list catch
+        | %empty
+;
+
+catch : CATCH LPAR exp RPAR
+                {
+//Bypass this carch if register doesn't match
+                    $1 = newLabel(program);
+                    t_axe_expression exp = create_expression(exception_reg, REGISTER);
+                    handle_binary_comparison(program, $3, exp, _NOTEQ_);
+                    gen_bne_instruction(program, $1, 0);
+}
+code_block
+                {
+                    assignLabel(program, $1);
+}
+
+throw_statement : THROW exp
+                {
+//Move exception value to exception register
+if($2.expression_type == IMMEDIATE)
+    gen_move_immediate(program, exception_reg, $2.value);
+else
+    gen_add_instruction(program,
+                        exception_reg,
+                        REG_0,
+                        $2.value,
+CG_DIRECT_ALL);
+
+ gen_bt_instruction(program, exception_label, 0);
+}
+
 
 read_statement : READ LPAR IDENTIFIER RPAR 
             {

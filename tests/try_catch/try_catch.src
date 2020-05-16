@@ -1,0 +1,14 @@
+int a;
+read(a);
+try {
+	if (a == 1)
+		throw 10;
+	write(1);
+	if (a == 2)
+		throw 20;
+	write(2);
+} catch (10) {
+	write(10);
+} catch (20) {
+	write(20);
+};
