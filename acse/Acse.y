@@ -137,7 +137,7 @@ extern int yyerror(const char* errmsg);
 %token <intval> TYPE
 %token <svalue> IDENTIFIER
 %token <intval> NUMBER
-%token  <label> TRY CATCH
+%token <label> TRY CATCH
 
 %type <expr> exp
 %type <decl> declaration
@@ -260,7 +260,7 @@ control_statement : if_statement         { /* does nothing */ }
             | do_while_statement SEMI    { /* does nothing */ }
             | return_statement SEMI      { /* does nothing */ }
             | try_catch_statement SEMI   { /* does nothing */ }
-            | throw_statement SEMI   { /* does nothing */ }
+            | throw_statement SEMI       { /* does nothing */ }
 ;
 
 read_write_statement : read_statement  { /* does nothing */ }
@@ -449,22 +449,10 @@ catch_list
                     assignLabel(program, $1);
 }
 
-catch_list : catch_list catch
-        |       %empty
 ;
 
-
-catch : CATCH LPAR exp RPAR
-                {
-//Bypass this catch if register does not match
-$1 = newLabel(program);
- t_axe_expression exp = create_expression(exception_reg, REGISTER);
- handle_binary_comparison(program, $3, exp, _NOTEQ_);
- gen_bne_instruction (program, $1, 0);
-}
-
 catch_list : catch_list catch
-        | %empty
+        |       %empty
 ;
 
 catch : CATCH LPAR exp RPAR
@@ -479,6 +467,7 @@ code_block
                 {
                     assignLabel(program, $1);
 }
+;
 
 throw_statement : THROW exp
                 {
@@ -493,7 +482,7 @@ else
 CG_DIRECT_ALL);
 
  gen_bt_instruction(program, exception_label, 0);
-}
+};
 
 
 read_statement : READ LPAR IDENTIFIER RPAR 
