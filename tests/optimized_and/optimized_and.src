@@ -1,0 +1,14 @@
+int x,y,z;
+
+read(x);
+read(y);
+read(z);
+
+if (x &&& y)
+     write(10);
+
+if ((x+1) &&& 0 &&& 2*(x/z)*(-y))
+   write(11);
+
+if ((x+1) &&& 1 &&& 2*(x/z)*(-y))
+   write(12);

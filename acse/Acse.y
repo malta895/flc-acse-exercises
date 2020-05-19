@@ -132,6 +132,8 @@ extern int yyerror(const char* errmsg);
 %token <intval> TYPE
 %token <svalue> IDENTIFIER
 %token <intval> NUMBER
+%token <sh_and> SHORT_AND_OP
+
 
 %type <expr> exp
 %type <decl> declaration
@@ -148,12 +150,15 @@ extern int yyerror(const char* errmsg);
 %left ANDAND
 %left OR_OP
 %left AND_OP
+%left SHORT_AND_OP
 %left EQ NOTEQ
 %left LT GT LTEQ GTEQ
 %left SHL_OP SHR_OP
 %left MINUS PLUS
 %left MUL_OP DIV_OP
 %right NOT
+
+
 
 /*=========================================================================
                          BISON GRAMMAR
@@ -514,6 +519,15 @@ exp: NUMBER      { $$ = create_expression ($1, IMMEDIATE); }
    | exp AND_OP exp     {
                            $$ = handle_bin_numeric_op(program, $1, $3, ANDB);
    }
+   | exp SHORT_AND_OP   {
+       if($1.expression_type == IMMEDIATE) {
+           if($1.value == 0)
+               gen_bt_instruction(program, $2.label, 0);
+       }
+                     }
+                exp {
+                    
+                }
    | exp OR_OP exp      {
                            $$ = handle_bin_numeric_op(program, $1, $3, ORB);
    }
